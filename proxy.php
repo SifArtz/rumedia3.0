@@ -60,4 +60,9 @@ if ($response === false) {
     echo $response;
 }
 
+$contentType = stripos($response, '<!DOCTYPE') === 0 ? 'text/html; charset=utf-8' : 'application/json';
+header("Content-Type: $contentType");
+
+echo $response;
+
 curl_close($ch);
