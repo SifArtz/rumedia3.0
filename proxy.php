@@ -1,27 +1,44 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+header("Content-Type: text/html; charset=UTF-8");
 
-$url = "https://rumedia.io/media/admin-cp/manage-songs?check_pro=1";
+$type = $_GET['type'] ?? 'premium';
+$trackId = $_GET['track'] ?? '';
 
-// Ваш cookie
-$cookie = "PHPSESSID=82013a22d081c9e1047758a92c04d081";
+switch ($type) {
+    case 'single':
+        $url = 'https://rumedia.io/media/admin-cp/manage-songs?check=1';
+        break;
+    case 'track':
+        $trackId = preg_replace('/[^A-Za-z0-9_-]/', '', $trackId);
+        $url = $trackId
+            ? 'https://rumedia.io/media/edit-track/' . $trackId
+            : 'https://rumedia.io/media/edit-track/';
+        break;
+    case 'premium':
+    default:
+        $url = 'https://rumedia.io/media/admin-cp/manage-songs?check_pro=1';
+        break;
+}
+
+// TODO: replace with a secure secret store in production
+$cookie = getenv('RUMEDIA_COOKIE') ?: 'PHPSESSID=82013a22d081c9e1047758a92c04d081';
 
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-// Устанавливаем Cookie
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Cookie: $cookie",
-    "User-Agent: Mozilla/5.0" // иногда требуется
+    "User-Agent: Mozilla/5.0",
 ]);
 
 $response = curl_exec($ch);
 
 if ($response === false) {
+    http_response_code(500);
     echo json_encode([
-        "error" => curl_error($ch)
+        'error' => curl_error($ch),
     ]);
 } else {
     echo $response;

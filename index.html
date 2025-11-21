@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUMEDIA Moderation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="brand">
+        <div class="logo">RM</div>
+        <div>
+          <p class="eyebrow">Модерация</p>
+          <h1>Панель релизов</h1>
+        </div>
+      </div>
+      <div class="filters">
+        <button class="pill active" data-type="premium">Премиум</button>
+        <button class="pill" data-type="single">Синглы</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="list-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Очередь</p>
+            <h2>Релизы</h2>
+          </div>
+          <div class="legend">
+            <span class="dot orange"></span> В модерации
+          </div>
+        </div>
+
+        <div id="loader" class="loader">Загрузка...</div>
+        <div id="error" class="error" hidden></div>
+
+        <div id="cards" class="card-grid" hidden></div>
+      </section>
+
+      <aside class="details" id="details" hidden>
+        <p class="eyebrow">Детали</p>
+        <h2 id="details-title">Выберите релиз</h2>
+        <div id="details-body" class="details-body">
+          <p class="muted">Кликните по карточке, чтобы загрузить сведения из формы редактирования.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
