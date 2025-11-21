@@ -7,56 +7,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$cookie = $_ENV['RUMEDIA_COOKIE'] ?? "PHPSESSID=82013a22d081c9e1047758a92c04d081";
-$target = $_GET['target'] ?? 'premium';
+$defaultUrl = 'https://rumedia.io/media/admin-cp/manage-songs?check=1';
+$target = $_GET['target'] ?? $defaultUrl;
 
-$map = [
-    'premium' => 'https://rumedia.io/media/admin-cp/manage-songs?check_pro=1',
-    'single'  => 'https://rumedia.io/media/admin-cp/manage-songs?check=1',
-    'queue'   => 'https://rumedia.io/media/admin-cp/manage-songs',
-    'track'   => 'https://rumedia.io/media/edit-track/'
+$allowedPrefixes = [
+    'https://rumedia.io/media/admin-cp/manage-songs',
+    'https://rumedia.io/media/edit-track',
+    'https://rumedia.io/media/endpoints',
 ];
 
-if (!array_key_exists($target, $map)) {
+$targetIsAllowed = false;
+foreach ($allowedPrefixes as $prefix) {
+    if (strpos($target, $prefix) === 0) {
+        $targetIsAllowed = true;
+        break;
+    }
+}
+
+if (!$targetIsAllowed) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid target']);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Invalid target URL']);
     exit;
 }
 
-if ($target === 'track') {
-    $trackId = $_GET['track_id'] ?? '';
-    if ($trackId === '') {
-        http_response_code(400);
-        echo json_encode(['error' => 'track_id is required']);
-        exit;
-    }
-    $url = $map[$target] . rawurlencode($trackId);
-} else {
-    $url = $map[$target];
-}
+$cookie = getenv('RUMEDIA_COOKIE') ?: 'PHPSESSID=82013a22d081c9e1047758a92c04d081';
 
-$ch = curl_init($url);
+$ch = curl_init($target);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Cookie: $cookie",
-    "User-Agent: Mozilla/5.0"
+    'User-Agent: Mozilla/5.0',
 ]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($_POST));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
 }
 
 $response = curl_exec($ch);
 
 if ($response === false) {
     http_response_code(500);
+    header('Content-Type: application/json');
     echo json_encode([
-        'error' => curl_error($ch)
+        'error' => curl_error($ch),
     ]);
-    curl_close($ch);
-    exit;
+} else {
+    header('Content-Type: text/html; charset=utf-8');
+    echo $response;
 }
 
 $contentType = stripos($response, '<!DOCTYPE') === 0 ? 'text/html; charset=utf-8' : 'application/json';
