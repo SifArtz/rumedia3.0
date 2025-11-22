@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUMEDIA Moderation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="header">
+      <div class="identity">
+        <div class="mark">RM</div>
+        <div>
+          <p class="micro">moderation</p>
+          <h1>Control Deck</h1>
+        </div>
+      </div>
+      <div class="switcher">
+        <button class="chip active" data-type="premium">Премиум</button>
+        <button class="chip" data-type="single">Сингл</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="board">
+        <div class="panel-head">
+          <div>
+            <p class="micro">очередь</p>
+            <h2>Релизы</h2>
+          </div>
+          <div class="hint">обновление с proxy.php</div>
+        </div>
+        <div id="loader" class="notice">Загрузка...</div>
+        <div id="error" class="notice error" hidden></div>
+        <div id="cards" class="cards" hidden></div>
+      </section>
+
+      <aside class="inspector" id="details" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="micro">детали</p>
+            <h2 id="details-title">Выберите релиз</h2>
+          </div>
+        </div>
+        <div id="details-body" class="inspector-body">
+          <p class="muted">Кликните по карточке, чтобы раскрыть данные формы редактирования и статистику пользователя.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
