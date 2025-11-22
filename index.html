@@ -1,97 +1,57 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RUMEDIA Moderation Hub</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUMEDIA Moderation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-    <div class="page">
-        <header class="topbar">
-            <div>
-                <p class="eyebrow">Панель модерации</p>
-                <h1>Очередь релизов RUMEDIA</h1>
-            </div>
-            <div class="controls">
-                <label class="select-label" for="mode">Поток</label>
-                <select id="mode" class="select">
-                    <option value="premium">Премиум</option>
-                    <option value="single">Синглы</option>
-                </select>
-                <button id="reload" class="button ghost">Обновить</button>
-            </div>
-        </header>
+  <div class="shell">
+    <header class="header">
+      <div class="identity">
+        <div class="mark">RM</div>
+        <div>
+          <p class="micro">moderation</p>
+          <h1>Control Deck</h1>
+        </div>
+      </div>
+      <div class="switcher">
+        <button class="chip active" data-type="premium">Премиум</button>
+        <button class="chip" data-type="single">Сингл</button>
+      </div>
+    </header>
 
-        <main>
-            <section class="hero">
-                <div class="hero__text">
-                    <h2>Современный обзор релизов</h2>
-                    <p>Карточки собирают данные из админ-панели и страницы редактирования трека: обложка, артист, название, жанр, дата загрузки, аудиоплеер и ключевые метаданные.</p>
-                </div>
-                <div class="hero__status">
-                    <div class="pill" id="status-pill">Ожидание запроса…</div>
-                    <p id="status-text">Выберите поток и дождитесь загрузки.</p>
-                </div>
-            </section>
+    <main class="grid">
+      <section class="board">
+        <div class="panel-head">
+          <div>
+            <p class="micro">очередь</p>
+            <h2>Релизы</h2>
+          </div>
+          <div class="hint">обновление с proxy.php</div>
+        </div>
+        <div id="loader" class="notice">Загрузка...</div>
+        <div id="error" class="notice error" hidden></div>
+        <div id="cards" class="cards" hidden></div>
+      </section>
 
-            <section id="grid" class="grid" aria-live="polite"></section>
-        </main>
-    </div>
-
-    <template id="card-template">
-        <article class="card">
-            <div class="card__media">
-                <img class="card__cover" alt="Обложка релиза" />
-                <button class="button primary" data-action="queue">Добавить в очередь</button>
-                <a class="button ghost" data-action="edit" target="_blank" rel="noreferrer">Редактировать</a>
-            </div>
-            <div class="card__body">
-                <header class="card__header">
-                    <div>
-                        <p class="eyebrow" data-field="uploaded"></p>
-                        <h3 data-field="title"></h3>
-                        <p class="muted" data-field="artist"></p>
-                    </div>
-                    <span class="badge" data-field="genre"></span>
-                </header>
-
-                <div class="meta">
-                    <div>
-                        <p class="label">Проигрыватель</p>
-                        <audio controls preload="none" data-field="player"></audio>
-                    </div>
-                </div>
-
-                <dl class="details">
-                    <div>
-                        <dt>Дата релиза</dt>
-                        <dd data-field="releaseDate"></dd>
-                    </div>
-                    <div>
-                        <dt>Язык</dt>
-                        <dd data-field="language"></dd>
-                    </div>
-                    <div>
-                        <dt>Возраст</dt>
-                        <dd data-field="age"></dd>
-                    </div>
-                    <div>
-                        <dt>Автор</dt>
-                        <dd data-field="author"></dd>
-                    </div>
-                    <div>
-                        <dt>Автор инструментала</dt>
-                        <dd data-field="producer"></dd>
-                    </div>
-                </dl>
-            </div>
-        </article>
-    </template>
-
-    <script src="app.js"></script>
+      <aside class="inspector" id="details" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="micro">детали</p>
+            <h2 id="details-title">Выберите релиз</h2>
+          </div>
+        </div>
+        <div id="details-body" class="inspector-body">
+          <p class="muted">Кликните по карточке, чтобы раскрыть данные формы редактирования и статистику пользователя.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script src="assets/app.js"></script>
 </body>
 </html>

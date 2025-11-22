@@ -4,7 +4,7 @@ const errorEl = document.getElementById('error');
 const detailPane = document.getElementById('details');
 const detailTitle = document.getElementById('details-title');
 const detailBody = document.getElementById('details-body');
-const filterButtons = document.querySelectorAll('.pill');
+const filterButtons = document.querySelectorAll('.chip');
 
 let currentType = 'premium';
 
@@ -22,6 +22,13 @@ function extractText(node) {
   return node.textContent.trim().replace(/\s+/g, ' ');
 }
 
+function parseUserStats(text) {
+  const sent = Number((text.match(/Отправлено:\s*(\d+)/i) || [])[1] || 0);
+  const declined = Number((text.match(/Отклонено:\s*(\d+)/i) || [])[1] || 0);
+  const removed = Number((text.match(/Снят\s*с\s*площадок:\s*(\d+)/i) || [])[1] || 0);
+  return { sent, declined, removed };
+}
+
 function parseSongs(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
@@ -34,6 +41,7 @@ function parseSongs(html) {
     const artistCell = cells[2];
     const artist = extractText(artistCell?.querySelector('a'));
     const artistBadge = /Премиум/i.test(artistCell?.textContent || '');
+    const userStats = parseUserStats(artistCell?.textContent || '');
     const titleCell = cells[3];
     const titleText = titleCell ? extractText(titleCell.childNodes[0]) : '';
     const audioSrc = titleCell?.querySelector('audio source')?.src || '';
@@ -57,6 +65,7 @@ function parseSongs(html) {
       editHref,
       trackId,
       queueLabel,
+      userStats,
     };
   });
 }
@@ -75,7 +84,7 @@ function createCard(song) {
     <img class="cover" src="${song.cover}" alt="${song.title}" />
     <div class="meta">
       <div>
-        <p class="eyebrow">${song.songId}</p>
+        <p class="micro">ID ${song.songId}</p>
         <h3>${song.title}</h3>
         <p class="artist">${song.artist}</p>
       </div>
@@ -91,16 +100,10 @@ function createCard(song) {
   return card;
 }
 
-function renderCards(songs) {
-  cardsEl.innerHTML = '';
-  songs.forEach((song) => cardsEl.appendChild(createCard(song)));
-  cardsEl.hidden = false;
-}
-
-function renderDetailField(label, value) {
+function field(label, value) {
   const row = document.createElement('div');
-  row.className = 'detail-row';
-  row.innerHTML = `<span class="detail-label">${label}</span><span class="detail-value">${value || '—'}</span>`;
+  row.className = 'field';
+  row.innerHTML = `<span class="label">${label}</span><span class="value">${value || '—'}</span>`;
   return row;
 }
 
@@ -121,8 +124,9 @@ function parseTrackDetails(html) {
   const ageRestriction = doc.querySelector('#age_restriction option:checked')?.textContent.trim() || '';
   const author = doc.querySelector('#written')?.value || '';
   const producer = doc.querySelector('#producer')?.value || '';
+  const vocal = doc.querySelector('#vocal option:checked')?.textContent.trim() || '';
 
-  return { artistName, releaseDate, language, ageRestriction, author, producer };
+  return { artistName, releaseDate, language, ageRestriction, author, producer, vocal };
 }
 
 async function showDetails(song) {
@@ -136,15 +140,60 @@ async function showDetails(song) {
     const data = parseTrackDetails(html);
 
     detailBody.innerHTML = '';
-    detailBody.appendChild(renderDetailField('Исполнитель', data.artistName || song.artist));
-    detailBody.appendChild(renderDetailField('Дата релиза', data.releaseDate));
-    detailBody.appendChild(renderDetailField('Язык', data.language));
-    detailBody.appendChild(renderDetailField('Возраст', data.ageRestriction));
-    detailBody.appendChild(renderDetailField('Автор', data.author));
-    detailBody.appendChild(renderDetailField('Автор инструментала', data.producer));
-    detailBody.appendChild(renderDetailField('Страница редактирования', `<a href="${song.editHref}" target="_blank">Открыть</a>`));
+
+    const releaseSection = document.createElement('div');
+    releaseSection.className = 'section';
+    releaseSection.innerHTML = `
+      <h4>Релиз</h4>
+      <div class="field"><span class="label">Исполнитель</span><span class="value">${data.artistName || song.artist}</span></div>
+      <div class="field"><span class="label">Дата</span><span class="value">${data.releaseDate}</span></div>
+      <div class="field"><span class="label">Жанр</span><span class="value">${song.genre || '—'}</span></div>
+      <div class="field"><span class="label">Статус</span><span class="value">${song.artistBadge ? 'Премиум' : 'Сингл'}</span></div>
+    `;
+
+    const vocalSection = document.createElement('div');
+    vocalSection.className = 'section';
+    vocalSection.innerHTML = `
+      <h4>Вокал и язык</h4>
+      <div class="field"><span class="label">Вокал</span><span class="value">${data.vocal}</span></div>
+      <div class="field"><span class="label">Язык</span><span class="value">${data.language}</span></div>
+      <div class="field"><span class="label">Возраст</span><span class="value">${data.ageRestriction}</span></div>
+    `;
+
+    const authorSection = document.createElement('div');
+    authorSection.className = 'section';
+    authorSection.innerHTML = `
+      <h4>Авторы</h4>
+      <div class="field"><span class="label">Автор текста</span><span class="value">${data.author}</span></div>
+      <div class="field"><span class="label">Автор инструментала</span><span class="value">${data.producer}</span></div>
+    `;
+
+    const userSection = document.createElement('div');
+    userSection.className = 'section';
+    userSection.innerHTML = `
+      <h4>Пользователь</h4>
+      <div class="field"><span class="label">Ник</span><span class="value">${song.artist}</span></div>
+      <div class="user-block">
+        <div class="stat"><span>отправлено</span><strong>${song.userStats.sent}</strong></div>
+        <div class="stat"><span>отклонено</span><strong>${song.userStats.declined}</strong></div>
+        <div class="stat"><span>снят с площадок</span><strong>${song.userStats.removed}</strong></div>
+      </div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'btn-row';
+    actions.innerHTML = `
+      <a class="btn" href="${song.editHref}" target="_blank">Редактировать</a>
+      <button class="btn secondary" type="button" onclick="event.stopPropagation(); window.open('${song.audioSrc}', '_blank');">Аудио</button>
+    `;
+
+    detailBody.appendChild(releaseSection);
+    detailBody.appendChild(vocalSection);
+    detailBody.appendChild(authorSection);
+    detailBody.appendChild(userSection);
+    detailBody.appendChild(actions);
   } catch (err) {
-    detailBody.innerHTML = `<p class="error">${err.message}</p>`;
+    detailBody.innerHTML = `<p class="notice error">${err.message}</p>`;
   }
 }
 
@@ -168,6 +217,12 @@ async function loadSongs() {
   } finally {
     loaderEl.hidden = true;
   }
+}
+
+function renderCards(songs) {
+  cardsEl.innerHTML = '';
+  songs.forEach((song) => cardsEl.appendChild(createCard(song)));
+  cardsEl.hidden = false;
 }
 
 loadSongs();
